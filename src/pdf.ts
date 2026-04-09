@@ -1,11 +1,35 @@
 import puppeteer from "puppeteer-core";
+// @ts-ignore — no types shipped with this package
+import chromium from "@sparticuz/chromium-min";
+import { chmodSync } from "fs";
+import path from "path";
+
+const CHROMIUM_URL =
+  "https://github.com/Sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar";
+
+// Ubuntu system library paths where libnspr4.so etc. live
+const SYSTEM_LIB_PATHS = [
+  "/usr/lib/x86_64-linux-gnu",
+  "/lib/x86_64-linux-gnu",
+  "/usr/lib",
+  "/lib",
+].join(":");
 
 export async function htmlToPdf(html: string): Promise<Buffer> {
-  const token = process.env.BROWSERLESS_TOKEN;
-  if (!token) throw new Error("BROWSERLESS_TOKEN env var is not set");
+  const executablePath = await chromium.executablePath(CHROMIUM_URL);
+  try { chmodSync(executablePath, 0o755); } catch {}
 
-  const browser = await puppeteer.connect({
-    browserWSEndpoint: `wss://chrome.browserless.io?token=${token}`,
+  const libDir = path.dirname(executablePath);
+  const ldPath = [libDir, "/tmp", SYSTEM_LIB_PATHS, process.env.LD_LIBRARY_PATH]
+    .filter(Boolean)
+    .join(":");
+
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath,
+    headless: chromium.headless,
+    env: { ...process.env, LD_LIBRARY_PATH: ldPath },
   });
 
   try {
@@ -21,6 +45,6 @@ export async function htmlToPdf(html: string): Promise<Buffer> {
 
     return Buffer.from(pdf);
   } finally {
-    await browser.disconnect();
+    await browser.close();
   }
 }
