@@ -1,12 +1,14 @@
 import puppeteer from "puppeteer-core";
 // @ts-ignore — no types shipped with this package
 import chromium from "@sparticuz/chromium-min";
+import { chmodSync } from "fs";
 
 const CHROMIUM_URL =
   "https://github.com/Sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar";
 
 export async function htmlToPdf(html: string): Promise<Buffer> {
   const executablePath = await chromium.executablePath(CHROMIUM_URL);
+  try { chmodSync(executablePath, 0o755); } catch {}
 
   const browser = await puppeteer.launch({
     args: chromium.args,
