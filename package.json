@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
-    "@sparticuz/chromium": "121.0.0",
+    "@sparticuz/chromium-min": "131.0.0",
     "googleapis": "^140.0.0",
-    "puppeteer-core": "21.6.0"
+    "puppeteer-core": "22.15.0"
   },
   "devDependencies": {
     "@netlify/functions": "^2.8.1",
