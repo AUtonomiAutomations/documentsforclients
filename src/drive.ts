@@ -6,20 +6,16 @@ const LEADS_FOLDER_NAME = "Leads";
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 function getDriveClient() {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON env var is not set");
+  const clientId     = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
-  let credentials: object;
-  try {
-    credentials = JSON.parse(raw);
-  } catch {
-    throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON");
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error("Missing GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN env vars");
   }
 
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ["https://www.googleapis.com/auth/drive"],
-  });
+  const auth = new google.auth.OAuth2(clientId, clientSecret, "http://localhost");
+  auth.setCredentials({ refresh_token: refreshToken });
 
   return google.drive({ version: "v3", auth });
 }
@@ -44,7 +40,7 @@ export async function findOrCreateClientFolder(clientName: string): Promise<Driv
 
   const leadsFolder = leadsRes.data.files?.[0];
   if (!leadsFolder?.id) {
-    throw new Error(`"${LEADS_FOLDER_NAME}" folder not found in Google Drive. Create it and share it with the service account.`);
+    throw new Error(`"${LEADS_FOLDER_NAME}" folder not found in Google Drive.`);
   }
 
   const leadsFolderId = leadsFolder.id;
