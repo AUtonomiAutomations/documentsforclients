@@ -21,9 +21,7 @@ export async function fetchTranscript(transcriptId: string): Promise<TranscriptD
         title
         date
         duration
-        participants {
-          displayName
-        }
+        participants
         sentences {
           speaker_name
           text
@@ -63,9 +61,7 @@ export async function fetchTranscript(transcriptId: string): Promise<TranscriptD
   }
 
   // Build participant list
-  const participants: string[] = (t.participants ?? [])
-    .map((p: any) => p.displayName as string)
-    .filter(Boolean);
+  const participants: string[] = (t.participants ?? []).filter(Boolean);
 
   // Build full conversation text
   const lines: string[] = [];
