@@ -74,10 +74,8 @@ export const handler: Handler = async (event) => {
 
     // ── Step 4: Convert to PDF ─────────────────────────────────────────────
     console.log("\n[Step 4] Converting to PDF...");
-    const [specPdf, autoPdf] = await Promise.all([
-      htmlToPdf(specHtml),
-      htmlToPdf(autoHtml),
-    ]);
+    const specPdf = await htmlToPdf(specHtml);
+    const autoPdf = await htmlToPdf(autoHtml);
     const autoHtmlBuffer = Buffer.from(autoHtml, "utf-8");
     console.log(`[PDF] spec=${specPdf.length} bytes, auto=${autoPdf.length} bytes`);
 
